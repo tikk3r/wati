@@ -2,10 +2,8 @@ use std::collections::BTreeMap;
 use std::error::Error;
 use std::fs::File;
 
-use nalgebra::{DMatrix, Vector3};
+use nalgebra::Vector3;
 use ndarray::Array1;
-
-use wide::f32x8;
 
 #[allow(clippy::too_many_arguments)]
 pub fn draw_uvcoverage(
@@ -47,48 +45,6 @@ pub fn draw_uvcoverage(
 
 // Celestial pole
 const XYZ_NORTH: Vector3<f64> = Vector3::new(0.0, 0.0, 1.0);
-
-pub fn calc_baselines(
-    ants: &BTreeMap<String, Vector3<f64>>,
-    pointing: (f64, f64),
-    phi: f64,
-) -> (DMatrix<f64>, DMatrix<f64>) {
-    let nants = ants.len();
-    let mut baseline_ns = DMatrix::<f64>::zeros(nants, nants);
-    let mut baseline_ew = DMatrix::<f64>::zeros(nants, nants);
-    // This is s
-    let xyz_pointing = Vector3::new(
-        (phi - pointing.0).cos() * pointing.1.cos(),
-        -(phi - pointing.0).sin() * pointing.1.cos(),
-        pointing.1.sin(),
-    );
-    // North: N = (X, Y, Z) = (0, 0, 1)
-    // This is "N - s"
-    let xyz_fake_north_projected = (XYZ_NORTH - xyz_pointing).normalize();
-    // This is u
-    //let xyz_east_projected = xyz_pointing.cross(&xyz_fake_north_projected).normalize();
-    let xyz_east_projected = xyz_fake_north_projected.cross(&xyz_pointing).normalize();
-    // This is v
-    let xyz_north_projected = xyz_pointing.cross(&xyz_east_projected).normalize();
-    //assert!(xyz_fake_north_projected != xyz_north_projected);
-
-    ants.iter().enumerate().for_each(|ant1| {
-        let (idx_ant1, (_ant1, ant1_pos)) = ant1;
-        ants.iter().enumerate().skip(idx_ant1).for_each(|ant2| {
-            let (idx_ant2, (_ant2, ant2_pos)) = ant2;
-            let xyz_baseline = ant1_pos - ant2_pos;
-
-            let xyz_baseline_projected =
-                xyz_baseline - xyz_baseline.dot(&xyz_pointing) * xyz_pointing;
-
-            let baseline_comp_ns = xyz_baseline_projected.dot(&xyz_north_projected);
-            let baseline_comp_ew = xyz_baseline_projected.dot(&xyz_east_projected);
-            baseline_ns[(idx_ant1, idx_ant2)] = baseline_comp_ns;
-            baseline_ew[(idx_ant1, idx_ant2)] = baseline_comp_ew;
-        })
-    });
-    (baseline_ns, baseline_ew)
-}
 
 #[allow(unused)]
 fn read_array_from_csv(filename: &str) -> Result<BTreeMap<String, Vector3<f64>>, Box<dyn Error>> {
