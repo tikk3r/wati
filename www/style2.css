@@ -1,0 +1,87 @@
+body {
+    color: #1b1e23;
+    font-size: small;
+    font-family: Recursive;
+    height: calc(100vh - 2em);
+    margin: 1em;
+    display: flex;
+}
+
+body > * {
+    flex: auto;
+    /*margin: 0 auto;*/
+}
+
+.domain, .gridline-y, .gridline-x, .annotation-line>line {
+    stroke: currentColor;
+    stroke-opacity: 0.1;
+}
+
+.hide {
+	visibility: hidden;
+	height: 0px;
+}
+
+#chart {
+    max-width: 90vh;
+    aspect-ratio: 1 / 1;
+}
+
+#control {
+    margin: 0;
+    padding: 0;
+}
+
+#antenna-control {
+    margin: 0;
+    padding: 0;
+}
+
+#checkboxlist {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    columns: 2;
+}
+
+#radiolist {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    columns: 2;
+}
+
+#status {
+    color: grey;
+}
+
+/* CSS */
+.button {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-decoration: none;
+  text-transform: uppercase;
+  color: #000;
+  cursor: pointer;
+  border: 3px solid;
+  padding: 0.25em 0.5em;
+  box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button:active {
+  box-shadow: 0px 0px 0px 0px;
+  top: 5px;
+  left: 5px;
+}
+
+@media (min-width: 768px) {
+  .button {
+    padding: 0.25em 0.75em;
+  }
+}
+

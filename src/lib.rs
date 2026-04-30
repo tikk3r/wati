@@ -1,9 +1,10 @@
 use wasm_bindgen::prelude::*;
-use web_sys::HtmlCanvasElement;
+
+use itertools::Itertools;
+
+use web_sys::js_sys::Uint8Array;
 
 mod func_plot;
-mod mandelbrot;
-mod plot3d;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -11,48 +12,31 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 /// Type alias for the result of a drawing function.
 pub type DrawResult<T> = Result<T, Box<dyn std::error::Error>>;
 
-/// Type used on the JS side to convert screen coordinates to chart
-/// coordinates.
 #[wasm_bindgen]
-pub struct Chart {
-    convert: Box<dyn Fn((i32, i32)) -> Option<(f64, f64)>>,
-}
+pub struct Chart {}
 
-/// Result of screen to chart coordinates conversion.
 #[wasm_bindgen]
-pub struct Point {
-    pub x: f64,
-    pub y: f64,
+pub fn shared_memory() -> JsValue {
+    wasm_bindgen::memory()
 }
 
 #[wasm_bindgen]
 impl Chart {
-    /// Draw provided power function on the canvas element using it's id.
-    /// Return `Chart` struct suitable for coordinate conversion.
-    pub fn power(canvas_id: &str, power: i32) -> Result<Chart, JsValue> {
-        let map_coord = func_plot::draw(canvas_id, power).map_err(|err| err.to_string())?;
-        Ok(Chart {
-            convert: Box::new(move |coord| map_coord(coord).map(|(x, y)| (x.into(), y.into()))),
-        })
-    }
-
-    /// Draw Mandelbrot set on the provided canvas element.
-    /// Return `Chart` struct suitable for coordinate conversion.
-    pub fn mandelbrot(canvas: HtmlCanvasElement) -> Result<Chart, JsValue> {
-        let map_coord = mandelbrot::draw(canvas).map_err(|err| err.to_string())?;
-        Ok(Chart {
-            convert: Box::new(map_coord),
-        })
-    }
-
-    pub fn plot3d(canvas: HtmlCanvasElement, pitch: f64, yaw: f64) -> Result<(), JsValue> {
-        plot3d::draw(canvas, pitch, yaw).map_err(|err| err.to_string())?;
-        Ok(())
-    }
-
-    /// This function can be used to convert screen coordinates to
-    /// chart coordinates.
-    pub fn coord(&self, x: i32, y: i32) -> Option<Point> {
-        (self.convert)((x, y)).map(|(x, y)| Point { x, y })
+    #[allow(clippy::too_many_arguments)]
+    pub fn plot_interferometer_uvcoverage(
+        dec: f64,
+        nu: f64,
+        n_chan: u32,
+        phi: f64,
+        duration: f64,
+        n_times: usize,
+        array: &str,
+        antenna_mask: &Uint8Array,
+    ) -> *const usize {
+        let mask: Vec<u8> = antenna_mask.to_vec();
+        let (u, v) =
+            func_plot::draw_uvcoverage(dec, nu, n_chan, phi, duration, n_times, array, mask);
+        let merged: Vec<f64> = u.into_iter().interleave(v).collect();
+        merged.as_ptr() as *const usize
     }
 }

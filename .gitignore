@@ -1,3 +1,6 @@
 /target
 .*.sw*
 .vscode/*
+**/node_modules
+**/dist
+**/pkg

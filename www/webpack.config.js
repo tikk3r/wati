@@ -6,9 +6,27 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bootstrap.js",
+    clean: true,
   },
   mode: "development",
+  experiments: {
+    asyncWebAssembly: true,
+  },
   plugins: [
-    new CopyWebpackPlugin(['index.html'])
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'index.html' },
+        { from: 'style.css' },
+        { from: 'style2.css' },
+      ],
+    }),
   ],
+  devtool: 'inline-source-map',
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    port: 8080,
+  },
 };
+

@@ -11,8 +11,14 @@ crate-type=["cdylib"]
 plotters = "^0.3.2"
 wasm-bindgen = "0.2.78"
 wee_alloc = "0.4.5"
-web-sys = { version = "0.3.39", features = ["HtmlCanvasElement"] }
+web-sys = { version = "0.3.39", features = ["HtmlCanvasElement", "console"] }
 plotters-canvas = "^0.3.0"
+ndarray = "0.16.1"
+nalgebra = "0.33.2"
+ndhistogram = "0.10.0"
+csv = "1.3.1"
+itertools = "0.13.0"
+wide = "0.7.30"
 
 [profile.release]
 lto = true

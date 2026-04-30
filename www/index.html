@@ -3,40 +3,74 @@
     <head>
 	<meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Plotters WebAssembly Demo</title>
-	<link rel="stylesheet" href="./style.css">
-    </head>
-    <body>
+	<title>Toy interferometer</title>
+        <link rel="stylesheet" type="text/css" href="./style2.css">
         <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
         <script src="./bootstrap.js"></script>
-	<main>
-	    <h1>Plotters WebAssembly Demo</h1>
-	    <div id="coord"></div>
-        <canvas id="canvas" width="600" height="400"></canvas>
-	    <div id="status">Loading WebAssembly...</div>
-	    <div id="control">
-			<label for="plot-type">Demo: </label>
-			<select id="plot-type">
-				<option value="0">Graph of y=1</option>
-				<option value="1">Graph of y=x</option>
-				<option value="2">Graph of y=x^2</option>
-				<option value="3">Graph of y=x^3</option>
-				<option value="4">Graph of y=x^4</option>
-				<option value="5">Graph of y=x^5</option>
-				<option value="mandelbrot">Mandelbrot Set</option>
-				<option value="3d-plot">3D Plot Demo</option>
-			</select>
-			<div id="3d-control" class="hide">
-				<label for="pitch">Pitch: </label> <input type="range" min="0" max="157" id="pitch" value="10"> <br/>
-				<label for="yaw">Yaw: </label> <input type="range" min="0" max="314" id="yaw" value="50">
-			</div>
-	    </div>
-	</main>
-	<footer>
-	    <a href="https://github.com/plotters-rs/plotters-wasm-demo" target="a">Source</a> |
-	    <a href="https://github.com/plotters-rs/plotters" target="a">Repo</a> |
-	    <a href="https://crates.io/crates/plotters" target="a">Crates</a> |
-	    <a href="https://docs.rs/plotters" target="a">Docs</a>
-	</footer>
+        <script src="https://unpkg.com/d3" charset="utf-8"></script>
+        <script src="https://unpkg.com/d3fc"></script>
+    </head>
+    <body>
+        <div style="align-items: center; min-width: 540px; max-width: 540px;">
+            <h1 style="text-align: center;">Wasm Accelerated Toy Interferometer</h1>
+            <div id="antenna-control" style="float: left; min-width: 280px; max-width: 280px;">
+                <fieldset style="float: left;">
+                    <legend>Telescope array:</legend>
+                    <form id="array_selector">
+                        <input type="radio" id="array_lofar" name="array" checked/>
+                        <label for="array_lofar">LOFAR</label></br>
+                        <input type="radio" id="array_emerlin" name="array"/>
+                        <label for="array_emerlin">e-MERLIN</label></br>
+                        <input type="radio" id="array_lambda" name="array"/>
+                        <label for="array_lambda">LAMBDA</label></br>
+                        <input type="radio" id="array_test" name="array"/>
+                        <label for="array_test">Test</label>
+                    </form>
+                </fieldset>
+                <fieldset id="freqbands" style="float: left;">
+                    <legend>Observing band:</legend>
+                    <form id="band_selector">
+                        <input type="radio" id="LBA" name="band"/>
+                        <label for="LBA">LBA</label></br>
+                        <input type="radio" id="HBA" name="band"/>
+                        <label for="HBA">HBA</label></br>
+                    </form>
+                </fieldset>
+                <fieldset id="antennas">
+                    <legend>Antennas:</legend>
+                </fieldset>
+            </div>
+            <div id="control" style="float: left; min-width: 256px; max-width: 256px;">
+                <fieldset>
+                    <legend>Controls</legend>
+                    <div id="uvcov-control">
+                        <label for="declination" id="label_dec">Observing declination: </label>
+                        <br/><input type="range" min="-90" max="90" id="declination" value="58" step=1> <br/>
+                        <label for="duration" id="label_itime">Integration time: </label> <br/> <input type="range" min="1" max="720" id="duration" value="480" step="1"> <br/>
+                        <label for="phi" id="label_time">Offset from noon:</label> <br/> <input type="range" min="0" max="720" id="phi" value="120" step="1"> <br/>
+                        <label for="time_channels" id="label_ntimes">Number of time samples: </label> <br/> <input type="range" min="1" max="100" id="time_channels" value="3" step="1"> <br/>
+                        <label for="frequency" id="label_freq">Observing frequency: </label> <br/> <input type="range" min="10" max="168" id="frequency" value="144"> <br/>
+                        <label for="frequency_channels" id="label_bandwidth">Number of channels: </label> <br/> <input type="range" min="1" max="10" id="frequency_channels" value="1" step="1"> <br/>
+                        <br/>
+                        <input type="checkbox" id="checkbox_colour_by_freq"><label>Colour by frequency</label><br/>
+                        <br/>
+                        <input style="width: 100%;" class="button" type="reset" id="btn_reset_sim">
+                        <input style="width: 100%;" class="button" type="button" id="btn_save_img" value="Save to PNG">
+                    </div>
+                    <br/>
+                </fieldset>
+                <fieldset>
+                    <legend>Performance statistics</legend>
+                    <div id="status">Loading WebAssembly...</div>
+                </fieldset>
+                <fieldset>
+                    <legend>About</legend>
+                    <div style="color: grey;">
+                        This is a toy project to experiment with Rust and WebAssembly (Wasm). The computationally expensive uv coverage is computed by Rust code compiled to Wasm, while the result is then visualised using D3.js.<br/><br/>© Frits Sweijen, 2024<br/><br/>Button design © Michael McMillan
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div id="chart"></div>
     </body>
 </html>
