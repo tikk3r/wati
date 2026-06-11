@@ -457,6 +457,10 @@ fn get_array_from_name(name: &str) -> BTreeMap<String, Vector3<f64>> {
                 "CZ-Ondrejov".to_string(),
                 Vector3::new(3979757.0, 1049928.0, 4856674.0),
             ),
+            (
+                "Gap Filler".to_string(),
+                Vector3::new(3799920.0, 574648.0, 5073230.0),
+            ),
         ])
     } else if name == "e-MERLIN" {
         BTreeMap::<String, Vector3<f64>>::from([

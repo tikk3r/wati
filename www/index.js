@@ -6,7 +6,8 @@
 // If you only use `npm` you can simply
 // import { Chart } from "wasm-demo" and remove `setup` call from `bootstrap.js`.
 class Chart {}
-import { shared_memory } from "wasm-demo";
+// OLD: import { shared_memory } from "wasm-demo";
+// shared_memory no longer needed — plot_interferometer_uvcoverage returns Float64Array directly
 
 const array_selector = document.getElementById("array_selector");
 const band_selector = document.getElementById("band_selector");
@@ -24,10 +25,9 @@ const control_uvcov = document.getElementById("uvcov-control");
 const status = document.getElementById("status");
 const antennas = document.getElementById("antennas");
 
-var antenna_list = {"LOFAR": ['CS001HBA0', 'CS001HBA1', 'CS002HBA0', 'CS002HBA1', 'CS003HBA0', 'CS003HBA1', 'CS004HBA0', 'CS004HBA1', 'CS005HBA0', 'CS005HBA1', 'CS006HBA0', 'CS006HBA1', 'CS007HBA0', 'CS007HBA1', 'CS011HBA0', 'CS011HBA1', 'CS013HBA0', 'CS013HBA1', 'CS017HBA0', 'CS017HBA1', 'CS021HBA0', 'CS021HBA1', 'CS024HBA0', 'CS024HBA1', 'CS028HBA0', 'CS028HBA1', 'CS030HBA0', 'CS030HBA1', 'CS031HBA0', 'CS031HBA1', 'CS032HBA0', 'CS032HBA1', 'CS101HBA0', 'CS101HBA1', 'CS103HBA0', 'CS103HBA1', 'CS201HBA0', 'CS201HBA1', 'CS301HBA0', 'CS301HBA1', 'CS302HBA0', 'CS302HBA1', 'CS401HBA0', 'CS401HBA1', 'CS501HBA0', 'CS501HBA1', 'RS106HBA', 'RS205HBA', 'RS208HBA', 'RS210HBA', 'RS305HBA', 'RS306HBA', 'RS307HBA', 'RS310HBA', 'RS406HBA', 'RS407HBA', 'RS409HBA', 'RS503HBA', 'RS508HBA', 'RS509HBA', 'DE601HBA', 'DE602HBA', 'DE603HBA', 'DE604HBA', 'DE605HBA', 'FR606HBA', 'SE607HBA', 'UK608HBA', 'DE609HBA', 'PL610HBA', 'PL611HBA', 'PL612HBA', 'IE613HBA', 'LV614HBA', "BG", "IT", "GMRT", "IT-NOTO", "CZ", "CZ-Ondrejov"].sort(),
+var antenna_list = {"LOFAR": ['CS001HBA0', 'CS001HBA1', 'CS002HBA0', 'CS002HBA1', 'CS003HBA0', 'CS003HBA1', 'CS004HBA0', 'CS004HBA1', 'CS005HBA0', 'CS005HBA1', 'CS006HBA0', 'CS006HBA1', 'CS007HBA0', 'CS007HBA1', 'CS011HBA0', 'CS011HBA1', 'CS013HBA0', 'CS013HBA1', 'CS017HBA0', 'CS017HBA1', 'CS021HBA0', 'CS021HBA1', 'CS024HBA0', 'CS024HBA1', 'CS028HBA0', 'CS028HBA1', 'CS030HBA0', 'CS030HBA1', 'CS031HBA0', 'CS031HBA1', 'CS032HBA0', 'CS032HBA1', 'CS101HBA0', 'CS101HBA1', 'CS103HBA0', 'CS103HBA1', 'CS201HBA0', 'CS201HBA1', 'CS301HBA0', 'CS301HBA1', 'CS302HBA0', 'CS302HBA1', 'CS401HBA0', 'CS401HBA1', 'CS501HBA0', 'CS501HBA1', 'RS106HBA', 'RS205HBA', 'RS208HBA', 'RS210HBA', 'RS305HBA', 'RS306HBA', 'RS307HBA', 'RS310HBA', 'RS406HBA', 'RS407HBA', 'RS409HBA', 'RS503HBA', 'RS508HBA', 'RS509HBA', 'DE601HBA', 'DE602HBA', 'DE603HBA', 'DE604HBA', 'DE605HBA', 'FR606HBA', 'SE607HBA', 'UK608HBA', 'DE609HBA', 'PL610HBA', 'PL611HBA', 'PL612HBA', 'IE613HBA', 'LV614HBA', "BG", "IT", "GMRT", "IT-NOTO", "CZ", "CZ-Ondrejov", "Gap Filler"].sort(),
     "e-MERLIN": ["Lovell", "MarkII", "Defford", "Knockin", "Pickmere", "Darnhall", "Cambridge"].sort(),
-    "LAMBDA": ["Ceduna","Parkes","Narrabri","Hobart","Perth"].sort(),
-    "Test": ["PL611HBA", "IE613HBA"].sort()};
+};
 
 /** Add event listeners. */
 function setupUI() {
@@ -376,22 +376,22 @@ function updatePlotUvCoverage() {
         let cb = document.getElementById(ant);
         antmask[i] = cb.checked ? 1 : 0;
     }
-    for (var i = 0; i < antmask.length; i++) {
-        let ant = antenna_list[telescope][i];
-    }
 
-	let uvptr = Chart.plot_interferometer_uvcoverage(dec_value, freq_value, freq_channels, phi_value, duration_value, t_channels, telescope, antmask);
-    var Nant = 0;
-    if (telescope == "LOFAR") {
-        Nant = 71;
-    } else if (telescope == "e-MERLIN") {
-        Nant = 7;
-    }
-    Nant = antmask.reduce((a, b) => a + b, 0);
-    let Nbaselines = Nant * (Nant - 1) / 2;
-    let Nvalues = ((Nant + Nbaselines)) * freq_channels * t_channels * 2;
-    const memory = shared_memory();
-    let uv_points = new Float64Array(memory.buffer, uvptr, Nvalues);
+	// OLD (use-after-free): returned dangling pointer from Rust, manually constructed Float64Array view
+    // let uvptr = Chart.plot_interferometer_uvcoverage(dec_value, freq_value, freq_channels, phi_value, duration_value, t_channels, telescope, antmask);
+    // var Nant = 0;
+    // if (telescope == "LOFAR") {
+    //     Nant = 71;
+    // } else if (telescope == "e-MERLIN") {
+    //     Nant = 7;
+    // }
+    // Nant = antmask.reduce((a, b) => a + b, 0);
+    // let Nbaselines = Nant * (Nant - 1) / 2;
+    // let Nvalues = ((Nant + Nbaselines)) * freq_channels * t_channels * 2;
+    // const memory = shared_memory();
+    // let uv_points = new Float64Array(memory.buffer, uvptr, Nvalues);
+
+    let uv_points = Chart.plot_interferometer_uvcoverage(dec_value, freq_value, freq_channels, phi_value, duration_value, t_channels, telescope, antmask);
 
     let arr = Array.from(uv_points);
     let full_uv = arr.flatMap((coord) => [coord, -coord]);
